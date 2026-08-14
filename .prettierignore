@@ -1,0 +1,11 @@
+dist
+node_modules
+src-tauri/target
+src-tauri/gen
+src/types/bindings.ts
+bun.lock
+
+# Reference documents, kept byte-for-byte as supplied
+prompt.md
+docs/
+.vscode/

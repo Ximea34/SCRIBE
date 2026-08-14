@@ -1,0 +1,16 @@
+[package]
+name = "mock-aurora"
+version = "0.1.0"
+description = "Scriptable stand-in for the IVAO Aurora 3rd-party socket"
+edition = "2021"
+publish = false
+
+[dependencies]
+tokio = { version = "1", features = [
+    "rt-multi-thread",
+    "net",
+    "time",
+    "sync",
+    "io-util",
+    "macros",
+] }

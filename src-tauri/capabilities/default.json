@@ -1,10 +1,15 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Capability for the main window",
+  "description": "Custom titlebar controls and board event delivery. No network, filesystem, shell or dialog access: the Aurora socket lives entirely in Rust.",
   "windows": ["main"],
   "permissions": [
-    "core:default",
-    "opener:default"
+    "core:window:allow-start-dragging",
+    "core:window:allow-minimize",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-is-maximized",
+    "core:window:allow-close",
+    "core:event:allow-listen",
+    "core:event:allow-unlisten"
   ]
 }
