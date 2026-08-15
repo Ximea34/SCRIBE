@@ -6,11 +6,11 @@ local 3rd-party TCP socket and shows which strips exist, which are live, and whi
 
 Desktop app: Tauri 2 (Rust) + Vite / React / TypeScript.
 
-> **Status.** Increments A to D of six are complete: the Aurora protocol layer, the connection
-> client, the mock server, the airport configuration loader, the domain layer (classification,
-> ordering, removal rules, board diffing), the running board (polling scheduler, engine, typed
-> IPC) and the interface shell — custom titlebar, tabs and the responsive VIGIE grid. The strips
-> themselves and the activation dialog land next.
+> **Status.** Increments A to E of six are complete. VIGIE shows live strips end to end: the
+> Aurora protocol layer, connection client, mock server, airport configuration, domain layer
+> (classification, ordering, removal rules, board diffing), polling scheduler, engine, typed IPC,
+> interface shell and the board itself. The activation dialog lands next, so strips are still
+> read-only.
 
 ## Prerequisites
 
@@ -109,6 +109,16 @@ breakpoints that stack or reorder them.
 Inria Sans Bold is bundled as woff2 under `src/assets/fonts` (SIL OFL 1.1, licence alongside) and
 declared `font-display: block`: a control room is not guaranteed online, and a font swapping in
 mid-session would reflow the whole board.
+
+Rust owns the board; React only renders it. Updates arrive as coalesced diffs on one event and
+land in a module-level store, never React context. Components subscribe to the narrowest slice
+they can: a column to its ordered list of callsigns, a strip to its own callsign alone. So a
+reorder never touches a strip, and a strip's data changing never touches its neighbours.
+
+Measured live against the mock at 200 traffics, over a 30-second window: **26 board commits,
+zero re-renders of an unchanged strip**, worst commit 0.90 ms, average 0.18 ms. Panes scroll
+independently and off-screen strips are skipped with `content-visibility`, so no virtualisation
+library is needed.
 
 ## Development
 

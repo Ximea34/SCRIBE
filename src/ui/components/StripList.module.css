@@ -1,0 +1,9 @@
+/* The reference insets are measured from the column's outer edge, so the 2 px border comes off
+   the padding to land the strip on 592 x 86 at exactly 12 px from the column edge. */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--strip-gap);
+  padding: calc(var(--pane-padding) - var(--border-width))
+    calc(var(--strip-inset) - var(--border-width));
+}

@@ -1,0 +1,23 @@
+.strip {
+  position: relative;
+  flex: none;
+  height: var(--strip-height);
+  background: var(--c-strip);
+  color: var(--c-strip-text);
+  /* Near-virtualisation for free: off-screen strips are not laid out or painted. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto var(--strip-height);
+}
+
+/* Tracking trails the last glyph, so the run sits half a tracking step left of the box centre;
+   the transform puts it back. Overflow is clipped as a backstop to the `>` truncation. */
+.cell {
+  position: absolute;
+  top: 50%;
+  transform: translate(calc(-50% + var(--tracking) / 2), -50%);
+  font-size: var(--font-strip);
+  line-height: 1;
+  letter-spacing: var(--tracking);
+  white-space: nowrap;
+  overflow: hidden;
+}
