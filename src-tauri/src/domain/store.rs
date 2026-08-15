@@ -7,7 +7,7 @@ use crate::airports::Airport;
 use crate::aurora::types::{FlightPlan, TrafficPosition};
 
 use super::activations::ActivationRecord;
-use super::board::{Board, BoardUpdate, Column, Columns};
+use super::board::{Board, BoardSnapshot, BoardUpdate, Column, Columns};
 use super::classifier::{classify, Context};
 use super::flight::Flight;
 use super::ordering;
@@ -58,7 +58,7 @@ pub struct Store {
     restorable: HashMap<Box<str>, Restorable>,
     board: Board,
     emitted: Board,
-    seq: u64,
+    seq: u32,
 }
 
 impl Store {
@@ -85,6 +85,14 @@ impl Store {
 
     pub fn flight(&self, callsign: &str) -> Option<&Flight> {
         self.flights.get(callsign)
+    }
+
+    pub fn flights(&self) -> impl Iterator<Item = &Flight> {
+        self.flights.values()
+    }
+
+    pub fn snapshot(&self) -> BoardSnapshot {
+        self.board.snapshot(self.seq)
     }
 
     pub fn tracked(&self) -> usize {
@@ -152,14 +160,26 @@ impl Store {
         }
     }
 
-    pub fn callsigns_awaiting_flight_plan(&self, now: Millis) -> Vec<Box<str>> {
-        self.pending
+    /// Callsigns with no plan yet, plus cached plans past their TTL — amendments are rare, so
+    /// the second set is normally empty.
+    pub fn callsigns_needing_flight_plan(&self, now: Millis, ttl: Millis) -> Vec<Box<str>> {
+        let pending = self
+            .pending
             .iter()
             .filter(|(_, plan)| {
                 plan.attempts < self.config.flight_plan_max_attempts && now >= plan.next_attempt
             })
-            .map(|(callsign, _)| callsign.clone())
-            .collect()
+            .map(|(callsign, _)| callsign.clone());
+
+        let stale = self
+            .flights
+            .values()
+            .filter(move |flight| {
+                !flight.state.is_archived() && now.saturating_sub(flight.fp_fetched_at) >= ttl
+            })
+            .map(|flight| flight.callsign.clone());
+
+        pending.chain(stale).collect()
     }
 
     /// A reconnect is the one event that makes a previously refused flight plan worth retrying.
@@ -230,8 +250,10 @@ impl Store {
     }
 
     pub fn take_update(&mut self) -> Option<BoardUpdate> {
-        let update = self.board.diff_from(&self.emitted, self.seq + 1)?;
-        self.seq += 1;
+        let update = self
+            .board
+            .diff_from(&self.emitted, self.seq.wrapping_add(1))?;
+        self.seq = self.seq.wrapping_add(1);
         self.emitted = self.board.clone();
         Some(update)
     }

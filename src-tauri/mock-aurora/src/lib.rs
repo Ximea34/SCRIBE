@@ -1,4 +1,6 @@
+use std::collections::HashMap;
 use std::net::SocketAddr;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
@@ -61,9 +63,66 @@ impl Script {
     }
 }
 
+/// What the client actually asked for, so polling budgets can be measured rather than assumed.
+#[derive(Debug, Default)]
+pub struct Stats {
+    pub requests: AtomicU64,
+    pub positions: AtomicU64,
+    pub flight_plans: AtomicU64,
+    pub traffic_lists: AtomicU64,
+    positions_by_callsign: Mutex<HashMap<String, u64>>,
+}
+
+impl Stats {
+    fn record(&self, command: &str, argument: &str) {
+        self.requests.fetch_add(1, Ordering::Relaxed);
+        match command {
+            "TRPOS" => {
+                self.positions.fetch_add(1, Ordering::Relaxed);
+                if let Ok(mut by_callsign) = self.positions_by_callsign.lock() {
+                    *by_callsign.entry(argument.to_owned()).or_default() += 1;
+                }
+            }
+            "FP" => {
+                self.flight_plans.fetch_add(1, Ordering::Relaxed);
+            }
+            "TR" => {
+                self.traffic_lists.fetch_add(1, Ordering::Relaxed);
+            }
+            _ => {}
+        }
+    }
+
+    /// Fewest position requests any single callsign received; the full-sweep worst case.
+    pub fn least_polled(&self) -> u64 {
+        self.positions_by_callsign
+            .lock()
+            .map(|by_callsign| by_callsign.values().copied().min().unwrap_or(0))
+            .unwrap_or(0)
+    }
+
+    pub fn distinct_callsigns_polled(&self) -> usize {
+        self.positions_by_callsign
+            .lock()
+            .map_or(0, |by_callsign| by_callsign.len())
+    }
+
+    /// Discards the warm-up so a measurement covers steady state, not the cold-start burst.
+    pub fn reset(&self) {
+        self.requests.store(0, Ordering::Relaxed);
+        self.positions.store(0, Ordering::Relaxed);
+        self.flight_plans.store(0, Ordering::Relaxed);
+        self.traffic_lists.store(0, Ordering::Relaxed);
+        if let Ok(mut by_callsign) = self.positions_by_callsign.lock() {
+            by_callsign.clear();
+        }
+    }
+}
+
 pub struct MockAurora {
     addr: SocketAddr,
     script: Arc<Mutex<Script>>,
+    stats: Arc<Stats>,
     join: JoinHandle<()>,
 }
 
@@ -80,8 +139,18 @@ impl MockAurora {
     pub async fn bind(addr: SocketAddr, script: Arc<Mutex<Script>>) -> std::io::Result<Self> {
         let listener = TcpListener::bind(addr).await?;
         let addr = listener.local_addr()?;
-        let join = tokio::spawn(accept_loop(listener, Arc::clone(&script)));
-        Ok(Self { addr, script, join })
+        let stats = Arc::new(Stats::default());
+        let join = tokio::spawn(accept_loop(
+            listener,
+            Arc::clone(&script),
+            Arc::clone(&stats),
+        ));
+        Ok(Self {
+            addr,
+            script,
+            stats,
+            join,
+        })
     }
 
     pub fn addr(&self) -> SocketAddr {
@@ -91,6 +160,10 @@ impl MockAurora {
     pub fn script(&self) -> Arc<Mutex<Script>> {
         Arc::clone(&self.script)
     }
+
+    pub fn stats(&self) -> Arc<Stats> {
+        Arc::clone(&self.stats)
+    }
 }
 
 impl Drop for MockAurora {
@@ -99,26 +172,36 @@ impl Drop for MockAurora {
     }
 }
 
-async fn accept_loop(listener: TcpListener, script: Arc<Mutex<Script>>) {
+async fn accept_loop(listener: TcpListener, script: Arc<Mutex<Script>>, stats: Arc<Stats>) {
     while let Ok((stream, _)) = listener.accept().await {
         let script = Arc::clone(&script);
+        let stats = Arc::clone(&stats);
         tokio::spawn(async move {
-            let _ = serve(stream, script).await;
+            let _ = serve(stream, script, stats).await;
         });
     }
 }
 
-async fn serve(stream: TcpStream, script: Arc<Mutex<Script>>) -> std::io::Result<()> {
+async fn serve(
+    stream: TcpStream,
+    script: Arc<Mutex<Script>>,
+    stats: Arc<Stats>,
+) -> std::io::Result<()> {
     let (reader, mut writer) = stream.into_split();
     let mut lines = BufReader::new(reader).lines();
     let mut oversized_pending = true;
 
     while let Some(line) = lines.next_line().await? {
+        let line = line.trim_end_matches('\r');
+        let body = line.strip_prefix('#').unwrap_or(line);
+        let (command, argument) = body.split_once(';').unwrap_or((body, ""));
+        stats.record(command, argument);
+
         let (replies, close, quirks) = {
             let Ok(script) = script.lock() else {
                 return Ok(());
             };
-            let (replies, close) = respond(line.trim_end_matches('\r'), &script);
+            let (replies, close) = respond(line, &script);
             (replies, close, script.quirks.clone())
         };
 

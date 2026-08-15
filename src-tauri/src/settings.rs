@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use crate::aurora::client::{ClientConfig, DEFAULT_PORT};
+use crate::aurora::scheduler::SchedulerConfig;
 use crate::domain::DomainConfig;
 
 pub const ENV_AIRPORTS_FILE: &str = "SCRIBE_AIRPORTS_FILE";
@@ -108,7 +109,7 @@ impl Default for Connection {
 impl Default for Polling {
     fn default() -> Self {
         Self {
-            budget_requests_per_second: 80,
+            budget_requests_per_second: 150,
             traffic_list_interval_ms: 1_000,
             station_interval_ms: 30_000,
             flight_plan_ttl_ms: 60_000,
@@ -204,6 +205,18 @@ impl Settings {
             request_timeout: Duration::from_millis(self.connection.request_timeout_ms),
             backoff_initial: Duration::from_millis(self.connection.backoff_initial_ms),
             backoff_max: Duration::from_millis(self.connection.backoff_max_ms),
+        }
+    }
+
+    pub fn scheduler_config(&self) -> SchedulerConfig {
+        SchedulerConfig {
+            budget_per_second: self.polling.budget_requests_per_second,
+            traffic_list_interval: self.polling.traffic_list_interval_ms,
+            station_interval: self.polling.station_interval_ms,
+            board_refresh: self.polling.board_refresh_ms,
+            near_refresh: self.polling.near_refresh_ms,
+            far_refresh: self.polling.far_refresh_ms,
+            in_flight_grace: self.connection.request_timeout_ms.saturating_mul(2),
         }
     }
 

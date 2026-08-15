@@ -7,6 +7,7 @@ use protocol::InvalidCallsign;
 pub mod client;
 pub mod codec;
 pub mod protocol;
+pub mod scheduler;
 pub mod types;
 
 pub use client::{AuroraClient, ClientConfig, ConnectionState, Reply};

@@ -11,7 +11,7 @@ pub mod ordering;
 pub mod store;
 pub mod strip;
 
-pub use board::{Board, BoardUpdate, Column, Columns, StripView};
+pub use board::{Board, BoardSnapshot, BoardUpdate, Column, Columns, StripView};
 pub use flight::Flight;
 pub use store::{ActivationError, DomainConfig, Store};
 pub use strip::{ArchiveReason, StripState, TransitionError};

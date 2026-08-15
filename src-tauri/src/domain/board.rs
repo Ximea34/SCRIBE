@@ -1,5 +1,8 @@
 use std::collections::BTreeMap;
 
+use serde::{Deserialize, Serialize};
+use specta::Type;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Column {
     Awake,
@@ -17,7 +20,8 @@ impl Column {
     ];
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
 pub struct Columns {
     pub awake: Vec<Box<str>>,
     pub activated_departures: Vec<Box<str>>,
@@ -52,7 +56,8 @@ impl Columns {
 }
 
 /// Exactly what one strip renders; everything else the modal fetches on demand.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
 pub struct StripView {
     pub callsign: Box<str>,
     pub adep: Box<str>,
@@ -67,17 +72,35 @@ pub struct Board {
     pub views: BTreeMap<Box<str>, StripView>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
 pub struct BoardUpdate {
-    pub seq: u64,
+    pub seq: u32,
     pub columns: Option<Columns>,
     pub upserted: Vec<StripView>,
     pub removed: Vec<Box<str>>,
 }
 
+/// The whole board at once, for a front end that has just mounted.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct BoardSnapshot {
+    pub seq: u32,
+    pub columns: Columns,
+    pub strips: Vec<StripView>,
+}
+
 impl Board {
+    pub fn snapshot(&self, seq: u32) -> BoardSnapshot {
+        BoardSnapshot {
+            seq,
+            columns: self.columns.clone(),
+            strips: self.views.values().cloned().collect(),
+        }
+    }
+
     /// Minimal delta, or `None` when nothing the front end can see has changed.
-    pub fn diff_from(&self, previous: &Self, seq: u64) -> Option<BoardUpdate> {
+    pub fn diff_from(&self, previous: &Self, seq: u32) -> Option<BoardUpdate> {
         let upserted: Vec<StripView> = self
             .views
             .iter()

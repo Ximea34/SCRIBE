@@ -23,6 +23,11 @@ fn state_of(store: &Store, callsign: &str) -> Option<StripState> {
     store.flight(callsign).map(|flight| flight.state)
 }
 
+/// The flight-plan TTL is exercised separately; these cases only care about pending fetches.
+fn awaiting(store: &Store, now: u64) -> Vec<Box<str>> {
+    store.callsigns_needing_flight_plan(now, u64::MAX)
+}
+
 #[test]
 fn a_callsign_without_a_flight_plan_never_reaches_the_board() {
     let mut store = store();
@@ -43,7 +48,7 @@ fn an_empty_flight_plan_counts_as_no_flight_plan() {
     store.apply(0, NOON);
 
     assert_eq!(store.tracked(), 0);
-    assert_eq!(store.callsigns_awaiting_flight_plan(3_000).len(), 1);
+    assert_eq!(awaiting(&store, 3_000).len(), 1);
 }
 
 #[test]
@@ -71,12 +76,12 @@ fn flight_plan_attempts_are_bounded_and_a_reconnect_rearms_them() {
         now += 20_000;
     }
     assert!(
-        store.callsigns_awaiting_flight_plan(now).is_empty(),
+        awaiting(&store, now).is_empty(),
         "five refusals is enough; stop spending the request budget"
     );
 
     store.rearm_flight_plans(now);
-    assert_eq!(store.callsigns_awaiting_flight_plan(now).len(), 1);
+    assert_eq!(awaiting(&store, now).len(), 1);
 }
 
 #[test]
@@ -85,8 +90,8 @@ fn a_retry_waits_for_its_backoff() {
     store.observe_radar(["FGXYZ"], 0);
     store.observe_missing_flight_plan("FGXYZ", 0);
 
-    assert!(store.callsigns_awaiting_flight_plan(1_999).is_empty());
-    assert_eq!(store.callsigns_awaiting_flight_plan(2_000).len(), 1);
+    assert!(awaiting(&store, 1_999).is_empty());
+    assert_eq!(awaiting(&store, 2_000).len(), 1);
 }
 
 #[test]
@@ -97,11 +102,11 @@ fn a_pending_callsign_is_forgotten_after_a_dropout_so_a_return_retries_it() {
     for _ in 0..5 {
         store.observe_missing_flight_plan("FGXYZ", 0);
     }
-    assert!(store.callsigns_awaiting_flight_plan(2_000).is_empty());
+    assert!(awaiting(&store, 2_000).is_empty());
 
     store.apply(GRACE + 1, NOON);
     store.observe_radar(["FGXYZ"], GRACE + 1);
-    assert_eq!(store.callsigns_awaiting_flight_plan(GRACE + 1).len(), 1);
+    assert_eq!(awaiting(&store, GRACE + 1).len(), 1);
 }
 
 #[test]
