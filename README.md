@@ -6,8 +6,9 @@ local 3rd-party TCP socket and shows which strips exist, which are live, and whi
 
 Desktop app: Tauri 2 (Rust) + Vite / React / TypeScript.
 
-> **Status.** Increment A of six is complete: the Aurora protocol layer, the connection client and
-> the mock server. The VIGIE board, the domain layer and the UI land in later increments.
+> **Status.** Increments A and B of six are complete: the Aurora protocol layer, the connection
+> client, the mock server, the airport configuration loader and the domain layer (classification,
+> ordering, removal rules, board diffing). The scheduler, the IPC layer and the UI land next.
 
 ## Prerequisites
 
@@ -25,6 +26,36 @@ SCRIBE cannot see anything until the controller enables the socket inside Aurora
 Aurora then listens on `127.0.0.1:1130` (TCP, local only, no authentication). Without this step
 nothing is listening and every connection attempt fails immediately. SCRIBE connects automatically
 on launch and retries with capped exponential backoff, so you can enable it at any time.
+
+## Airport configuration
+
+The centre point of the controlled airport is not available anywhere in the Aurora protocol, so it
+comes from a file you supply. Plain UTF-8 text, one airport per line, `;`-separated, `#` starts a
+comment, blank lines are ignored:
+
+```
+# SCRIBE airport configuration
+# ICAO;NAME;LAT;LON;ELEV_FT
+LFLL;LYON SAINT EXUPERY;45°43'32"N;005°04'52"E;821
+```
+
+Coordinates are deliberately forgiving. All of these are the same longitude:
+
+```
+005°04'52"E      E005 04 52      005 04 52 E      E005.04.52      5.081111E      5.081111
+```
+
+DMS with or without symbols, hemisphere before or after, dot- or space- or colon-separated,
+signed or hemisphere-suffixed decimal degrees, and fractional seconds. North and east are
+positive. Elevation is an integer in feet and may be negative.
+
+A malformed line is skipped and logged with its line number — it never aborts the file. A repeated
+ICAO keeps the last definition and warns. Extra trailing columns are reserved for future fields and
+ignored. If the airport you selected is not in the file, that is a hard startup error.
+
+Selecting the file and the active airport will live in the OPTIONS tab. Until it exists, both are
+persisted in `settings.json` in the OS application config directory, with environment overrides for
+development: `SCRIBE_AIRPORTS_FILE`, `SCRIBE_ICAO` and `SCRIBE_AURORA_ADDR`.
 
 ## Development
 

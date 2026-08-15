@@ -1,5 +1,8 @@
+pub mod airports;
 pub mod aurora;
+pub mod domain;
 pub mod error;
+pub mod settings;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
