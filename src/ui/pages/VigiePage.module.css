@@ -1,0 +1,8 @@
+.board {
+  height: 100%;
+  padding: var(--gutter);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  column-gap: var(--column-gap);
+  min-height: 0;
+}

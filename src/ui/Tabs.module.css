@@ -1,0 +1,39 @@
+.tabs {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--tab-gap);
+  flex: 1;
+  min-width: 0;
+}
+
+/* Stretched so the whole blank band between EDITEUR and OPTIONS is a drag target. */
+.spacer {
+  flex: 1;
+  align-self: stretch;
+}
+
+/* Radius on the top corners only, so the active tab reads as continuous with the board. */
+.tab {
+  flex: 0 1 var(--tab-width);
+  width: var(--tab-width);
+  min-width: 0;
+  height: var(--tab-height);
+  display: grid;
+  place-items: center;
+  background: var(--c-tab);
+  color: var(--c-text);
+  font-size: var(--font-tab);
+  border-radius: var(--tab-radius) var(--tab-radius) 0 0;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.active {
+  background: var(--c-bg);
+}
+
+.narrow {
+  flex: 0 0 var(--tab-width-options);
+  width: var(--tab-width-options);
+  margin-right: var(--options-inset);
+}

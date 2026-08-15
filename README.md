@@ -6,10 +6,11 @@ local 3rd-party TCP socket and shows which strips exist, which are live, and whi
 
 Desktop app: Tauri 2 (Rust) + Vite / React / TypeScript.
 
-> **Status.** Increments A to C of six are complete: the Aurora protocol layer, the connection
+> **Status.** Increments A to D of six are complete: the Aurora protocol layer, the connection
 > client, the mock server, the airport configuration loader, the domain layer (classification,
-> ordering, removal rules, board diffing) and the running board — polling scheduler, engine and
-> typed IPC. The user interface lands next; the window is still the stock one.
+> ordering, removal rules, board diffing), the running board (polling scheduler, engine, typed
+> IPC) and the interface shell — custom titlebar, tabs and the responsive VIGIE grid. The strips
+> themselves and the activation dialog land next.
 
 ## Prerequisites
 
@@ -89,6 +90,25 @@ at least once every 4.5 s, each flight plan fetched exactly once, and 25 board u
 because unchanged boards emit nothing. `budgetRequestsPerSecond` is the one number that still needs
 validating against real Aurora — loopback carries it easily, but Aurora's own handler capacity is
 unknown. Lowering it degrades gracefully: distant traffic slows down first, the board last.
+
+## Interface
+
+The board is laid out against a 1920 × 1080 reference composition and scales from a 1280 × 720
+minimum upward. Two scale factors drive everything, both carrying `px` so a plain number can
+multiply them:
+
+```css
+--s: clamp(0.667px, min(100vw / 1920, 100vh / 1080), 1.5px); /* the board */
+--s-chrome: clamp(0.85px, min(100vw / 1920, 100vh / 1080), 1.25px); /* titlebar and tabs */
+```
+
+The board floor puts strip text at 24 px on a 720p panel; the chrome has a higher floor so the
+window controls stay comfortably clickable at that size. Three columns, always — there are no
+breakpoints that stack or reorder them.
+
+Inria Sans Bold is bundled as woff2 under `src/assets/fonts` (SIL OFL 1.1, licence alongside) and
+declared `font-display: block`: a control room is not guaranteed online, and a font swapping in
+mid-session would reflow the whole board.
 
 ## Development
 

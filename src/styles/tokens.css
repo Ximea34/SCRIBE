@@ -1,0 +1,72 @@
+/* Bundled locally: a control room is not guaranteed online and a font swap mid-session
+   would reflow the whole board. `block` waits rather than showing a fallback first. */
+@font-face {
+  font-family: "Inria Sans";
+  font-style: normal;
+  font-weight: 700;
+  font-display: block;
+  src: url("../assets/fonts/InriaSans-Bold-latin.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Inria Sans";
+  font-style: normal;
+  font-weight: 700;
+  font-display: block;
+  src: url("../assets/fonts/InriaSans-Bold-latin-ext.woff2") format("woff2");
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F,
+    U+A720-A7FF;
+}
+
+:root {
+  /* The reference composition is 1920 x 1080. Both scales carry px so a plain number can
+     multiply them: calc(36 * var(--s)) is 36px at reference and 24px at 720p. The board
+     floor keeps strip text at 24px; chrome has a higher floor so window controls stay
+     clickable, and both have a ceiling so a 4K panel does not look absurd. */
+  --s: clamp(0.667px, min(100vw / 1920, 100vh / 1080), 1.5px);
+  --s-chrome: clamp(0.85px, min(100vw / 1920, 100vh / 1080), 1.25px);
+
+  --c-titlebar: #1b2938;
+  --c-window: #303030;
+  --c-bg: #1b1c1b;
+  --c-tab: #679bd2;
+  --c-header: #333333;
+  --c-header-text: #a1bedb;
+  --c-border: #838783;
+  --c-strip: #d9d9d9;
+  --c-strip-text: #000000;
+  --c-text: #ffffff;
+
+  --titlebar-height: calc(42 * var(--s-chrome));
+  --tab-height: calc(34 * var(--s-chrome));
+  --tab-width: calc(227 * var(--s-chrome));
+  --tab-width-options: calc(119 * var(--s-chrome));
+  --tab-gap: calc(13 * var(--s-chrome));
+  --tab-radius: calc(16 * var(--s-chrome));
+  --control-size: calc(24 * var(--s-chrome));
+  --control-gap: calc(16 * var(--s-chrome));
+  --control-inset: calc(11 * var(--s-chrome));
+  /* Lands the OPTIONS tab's right edge on the reference 1775, given uniform 24 px controls. */
+  --options-inset: calc(30 * var(--s-chrome));
+
+  --gutter: calc(13 * var(--s));
+  --column-gap: calc(23 * var(--s));
+  --column-header-height: calc(53 * var(--s));
+  --column-header-gap: calc(13 * var(--s));
+  --pane-gap: calc(18 * var(--s));
+  --pane-padding: calc(14 * var(--s));
+  --strip-inset: calc(12 * var(--s));
+  --strip-height: calc(86 * var(--s));
+  --strip-gap: calc(18 * var(--s));
+  --border-width: max(1px, calc(2 * var(--s)));
+
+  --font-tab: calc(24 * var(--s-chrome));
+  --font-column-header: calc(36 * var(--s));
+  --font-strip: calc(36 * var(--s));
+  --tracking: 0.1em;
+}

@@ -1,0 +1,7 @@
+.titlebar {
+  flex: none;
+  display: flex;
+  align-items: stretch;
+  height: var(--titlebar-height);
+  background: var(--c-titlebar);
+}

@@ -1,0 +1,63 @@
+.column {
+  display: grid;
+  grid-template-rows: var(--column-header-height) 1fr;
+  row-gap: var(--column-header-gap);
+  min-width: 0;
+  min-height: 0;
+}
+
+.header {
+  margin: 0;
+  display: grid;
+  place-items: center;
+  background: var(--c-header);
+  color: var(--c-header-text);
+  font-size: var(--font-column-header);
+  font-weight: 700;
+  overflow: hidden;
+}
+
+/* Tracking also trails the last glyph; pulling it back keeps the label optically centred. */
+.label {
+  letter-spacing: var(--tracking);
+  margin-right: calc(-1 * var(--tracking));
+  white-space: nowrap;
+}
+
+.body {
+  display: grid;
+  grid-template-rows: 1fr;
+  min-height: 0;
+}
+
+.split {
+  grid-template-rows: 1fr 1fr;
+  row-gap: var(--pane-gap);
+}
+
+.pane {
+  border: var(--border-width) solid var(--c-border);
+  background: var(--c-bg);
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-border) var(--c-bg);
+}
+
+.pane::-webkit-scrollbar {
+  width: calc(10 * var(--s));
+}
+
+.pane::-webkit-scrollbar-track {
+  background: var(--c-bg);
+}
+
+.pane::-webkit-scrollbar-thumb {
+  background: var(--c-border);
+  border-radius: calc(5 * var(--s));
+}
+
+.pane::-webkit-scrollbar-thumb:hover {
+  background: var(--c-header-text);
+}
