@@ -1,0 +1,71 @@
+.shell {
+  display: flex;
+  min-height: 0;
+  min-width: 0;
+}
+
+/* Native scrolling is kept — only its chrome is replaced, so wheel, drag, keyboard and
+   trackpad momentum all keep working. */
+.viewport {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+}
+
+.viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.bar {
+  flex: none;
+  width: var(--scrollbar-width);
+  display: flex;
+  flex-direction: column;
+  background: var(--c-panel);
+  border: var(--border-width) solid var(--c-border);
+}
+
+.arrow {
+  flex: none;
+  width: 100%;
+  height: var(--scrollbar-width);
+  display: grid;
+  place-items: center;
+  color: var(--c-scroll);
+}
+
+.arrow svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.down svg {
+  transform: rotate(180deg);
+}
+
+.track {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.thumb {
+  position: absolute;
+  left: 50%;
+  width: calc(6 * var(--s));
+  transform: translateX(-50%);
+  background: var(--c-scroll);
+  border-radius: calc(3 * var(--s));
+  cursor: grab;
+}
+
+.thumb:active {
+  cursor: grabbing;
+}
+
+.hidden {
+  visibility: hidden;
+}

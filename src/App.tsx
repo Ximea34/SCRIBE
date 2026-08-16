@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import type { Tab } from "./app/router";
 import { Titlebar } from "./ui/Titlebar";
-import { EditorPage } from "./ui/pages/EditorPage";
+import { EditorPage } from "./ui/pages/editor/EditorPage";
 import { IfrPage } from "./ui/pages/IfrPage";
 import { OptionsPage } from "./ui/pages/OptionsPage";
 import { VigiePage } from "./ui/pages/VigiePage";

@@ -1,0 +1,209 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  width: var(--panel-width);
+  min-height: 0;
+}
+
+.tabs {
+  display: flex;
+  gap: var(--panel-tab-gap);
+  flex: none;
+}
+
+/* The inverse of the main app tabs: active is white with blue text. */
+.tab {
+  width: var(--panel-tab-width);
+  height: var(--panel-tab-height);
+  display: grid;
+  place-items: center;
+  font-size: var(--font-editor-label);
+  border-radius: var(--panel-radius) var(--panel-radius) 0 0;
+  background: var(--c-accent);
+  color: var(--c-text);
+}
+
+.tabActive {
+  background: var(--c-panel);
+  color: var(--c-accent);
+}
+
+/* Square top-left only, because the active tab sits against that corner. */
+.body {
+  flex: 1;
+  min-height: 0;
+  background: var(--c-panel);
+  border-radius: 0 var(--panel-radius) var(--panel-radius) var(--panel-radius);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* The reference row is 364 wide with fixed sub-positions: name at rel 0, the size widget at
+   rel 205, add at rel 324, trash at rel 345. Fixed tracks, never 1fr. */
+.headers,
+.row {
+  display: grid;
+  grid-template-columns:
+    calc(205 * var(--s))
+    calc(69 * var(--s))
+    calc(50 * var(--s))
+    calc(19 * var(--s))
+    calc(2 * var(--s))
+    calc(19 * var(--s));
+  column-gap: 0;
+  align-items: center;
+  width: var(--panel-row-width);
+  margin-left: var(--panel-row-inset);
+  font-size: var(--font-editor-row);
+  color: var(--c-strip-text);
+}
+
+/* Placed by column rather than by margin, so the order never depends on the child order. */
+.addCell {
+  grid-column: 4;
+}
+
+.trashCell {
+  grid-column: 6;
+}
+
+.headers {
+  height: calc(20 * var(--s));
+  flex: none;
+  margin-top: calc(7 * var(--s));
+}
+
+/* Nom sits at the row's left edge like the field names beneath it; Taille is centred over the
+   size widget's 69 px column. */
+.headerName {
+  text-align: left;
+  padding-left: calc(4 * var(--s));
+}
+
+.headerSize {
+  text-align: center;
+}
+
+.list {
+  flex: 1;
+  min-height: 0;
+  padding-top: calc(2 * var(--s));
+}
+
+.row {
+  position: relative;
+  height: var(--panel-row-height);
+  margin-bottom: var(--panel-row-gap);
+  background: var(--c-row);
+}
+
+/* A field with at least one placement is marked without shifting any text. */
+.used::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: calc(2 * var(--s));
+  background: var(--c-accent);
+}
+
+.name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: clip;
+  padding-left: calc(4 * var(--s));
+}
+
+.nameInput {
+  font: inherit;
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: inherit;
+  padding-left: calc(4 * var(--s));
+}
+
+.stepper {
+  display: grid;
+  grid-template-columns: var(--icon-small) 1fr var(--icon-small);
+  align-items: center;
+  gap: calc(3 * var(--s));
+  width: calc(69 * var(--s));
+}
+
+.step {
+  width: var(--icon-small);
+  height: var(--icon-small);
+  color: var(--c-accent);
+}
+
+.step svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.step:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.value {
+  height: var(--panel-row-height);
+  display: grid;
+  place-items: center;
+  background: var(--c-size-bg);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Same value box as the steppers, so turning an element reads as one of its size controls. */
+.turn {
+  grid-column: 2;
+  width: calc(37 * var(--s));
+  margin-left: calc(16 * var(--s));
+  color: var(--c-accent);
+}
+
+/* A property line belongs to the element above it, so it is indented and unshaded. */
+.property {
+  background: none;
+}
+
+.propertyLabel {
+  padding-left: calc(14 * var(--s));
+  color: var(--c-input);
+}
+
+.action {
+  width: var(--icon-row);
+  height: var(--icon-row);
+}
+
+.action svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.add {
+  color: var(--c-accent);
+}
+
+.remove {
+  color: var(--c-danger);
+}
+
+.action:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* Pinned so it never scrolls away as instances accumulate. */
+.palette {
+  flex: none;
+  padding-bottom: calc(4 * var(--s));
+  border-bottom: var(--border-width) solid var(--c-row);
+  margin-bottom: calc(4 * var(--s));
+}

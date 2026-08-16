@@ -42,6 +42,15 @@
   --c-strip-text: #000000;
   --c-text: #ffffff;
 
+  /* EDITEUR */
+  --c-panel: #ffffff;
+  --c-row: #d9d9d9;
+  --c-input: #333333;
+  --c-accent: #679bd2;
+  --c-danger: #b52c2c;
+  --c-scroll: #3f3f3f;
+  --c-size-bg: #efefef;
+
   --titlebar-height: calc(42 * var(--s-chrome));
   --tab-height: calc(34 * var(--s-chrome));
   --tab-width: calc(227 * var(--s-chrome));
@@ -69,4 +78,36 @@
   --font-column-header: calc(36 * var(--s));
   --font-strip: calc(36 * var(--s));
   --tracking: 0.1em;
+
+  /* EDITEUR geometry, all from the 1920 x 1080 reference */
+  --font-editor-label: calc(24 * var(--s));
+  --font-editor-row: calc(16 * var(--s));
+  --editor-gutter: calc(34 * var(--s));
+  --size-box-width: calc(137 * var(--s));
+  --size-box-gap: calc(15 * var(--s));
+  --size-label-height: calc(29 * var(--s));
+  --size-input-height: calc(49 * var(--s));
+  --canvas-width: calc(1406 * var(--s));
+  --canvas-height: calc(528 * var(--s));
+  --name-input-width: calc(497 * var(--s));
+  --name-input-height: calc(45 * var(--s));
+  --save-width: calc(120 * var(--s));
+  --panel-width: calc(418 * var(--s));
+  --panel-tab-width: calc(128 * var(--s));
+  --panel-tab-height: calc(28 * var(--s));
+  --panel-tab-gap: calc(3 * var(--s));
+  --panel-radius: calc(8 * var(--s));
+  --panel-row-width: calc(364 * var(--s));
+  --panel-row-height: calc(19 * var(--s));
+  --panel-row-gap: calc(2 * var(--s));
+  --panel-row-inset: calc(29 * var(--s));
+  --explorer-width: calc(743 * var(--s));
+  --explorer-height: calc(328 * var(--s));
+  --explorer-row-height: calc(34 * var(--s));
+  --explorer-row-gap: calc(5 * var(--s));
+  --explorer-row-inset: calc(11 * var(--s));
+  --scrollbar-width: calc(14 * var(--s));
+  --icon-small: calc(13 * var(--s));
+  --icon-row: calc(19 * var(--s));
+  --icon-explorer: calc(20 * var(--s));
 }

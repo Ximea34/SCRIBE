@@ -34,6 +34,60 @@ async flightDetail(callsign: string) : Promise<Result<FlightDetail | null, IpcEr
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
+},
+/**
+ * Static and compiled in: the editor never asks Aurora for it.
+ */
+async getFieldCatalogue() : Promise<CatalogueEntry[]> {
+    return await TAURI_INVOKE("get_field_catalogue");
+},
+async listTemplates() : Promise<Result<TemplateListing[], StorageError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("list_templates") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async loadTemplate(fileName: string) : Promise<Result<StripTemplate, StorageError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("load_template", { fileName }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
+ * `bound` is the file the editor currently owns; it only decides whether an existing target
+ * needs confirming. Saving never deletes, so a new name always yields a new template.
+ */
+async saveTemplate(template: StripTemplate, bound: string | null, overwrite: boolean) : Promise<Result<SaveOutcome, StorageError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("save_template", { template, bound, overwrite }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async deleteTemplate(fileName: string) : Promise<Result<null, StorageError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("delete_template", { fileName }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
+ * The picker runs in the front end; reading and validating stays here so the webview never
+ * needs a filesystem capability.
+ */
+async importLogo(path: string) : Promise<Result<ImportedLogo, LogoError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("import_logo", { path }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 }
 }
 
@@ -61,16 +115,63 @@ export type BoardUpdate = { seq: number; columns: Columns | null; upserted: Stri
  * Coalesced board delta. Emitted at most every `emitIntervalMs`, never once per parsed line.
  */
 export type BoardUpdated = BoardUpdate
+export type CatalogueEntry = { 
+/**
+ * Goes into the JSON and must never change; renaming one would orphan every saved template.
+ */
+key: string; label: string; source: FieldSource }
 export type Columns = { awake: string[]; activatedDepartures: string[]; arrivals: string[]; transits: string[] }
+export type DesignElement = ({ kind: "line" } & LineElement) | ({ kind: "frame" } & FrameElement) | ({ kind: "text" } & TextElement) | ({ kind: "image" } & ImageElement)
+export type FieldSource = "flightPlan" | "trafficPosition" | "derived"
 /**
  * Everything the activation dialog shows. Deliberately off the high-frequency board stream.
  */
 export type FlightDetail = { callsign: string; aircraft: string; wake: string; rules: string; flightType: string; dep: string; arr: string; alternate: string; eobt: string; cruiseLevel: string; route: string; squawk: string; assumedBy: string; stand: string }
+export type FrameElement = { id: string; xMm: number; yMm: number; widthMm: number; heightMm: number; thicknessMm: number }
+/**
+ * The image travels as base64 inside the JSON so a template stays portable when it is shared
+ * before an event.
+ */
+export type ImageElement = { id: string; xMm: number; yMm: number; widthMm: number; heightMm: number; mime: string; data: string }
+export type ImportedLogo = { mime: string; data: string; widthPx: number; heightPx: number }
 export type IpcError = { kind: "notRunning" } | { kind: "unknownCallsign"; message: string } | { kind: "rejected"; message: string }
+export type LineElement = { id: string; xMm: number; yMm: number; lengthMm: number; thicknessMm: number; orientation: Orientation }
+export type LogoError = { kind: "read"; detail: string } | { kind: "tooLarge"; detail: { bytes: number; limit: number } } | { kind: "unsupported" } | { kind: "dimensions" }
+export type NameError = { kind: "empty" } | { kind: "wordCount"; detail: number } | { kind: "icao"; detail: string } | { kind: "position"; detail: string } | { kind: "kind"; detail: string } | { kind: "suffix"; detail: string }
+export type Orientation = "horizontal" | "vertical"
+/**
+ * `xMm` / `yMm` is the top-left of the text box, so changing a font size grows the text
+ * down-and-right and never moves its origin.
+ */
+export type Placement = { id: string; xMm: number; yMm: number }
+export type SaveOutcome = { outcome: "saved"; fileName: string } | 
+/**
+ * The target exists and is not the file being replaced; overwriting would destroy a
+ * colleague's template on a shared event machine.
+ */
+{ outcome: "needsConfirmation"; fileName: string }
+export type StorageError = { kind: "name"; detail: NameError } | { kind: "directory"; detail: string } | { kind: "file"; detail: string } | { kind: "schema"; detail: string }
+export type StripSize = { lengthMm: number; widthMm: number }
+/**
+ * Everything geometric is millimetres from the strip's top-left corner, font sizes are points.
+ * Pixels never enter the document — they belong to the canvas render layer alone.
+ */
+export type StripTemplate = { schemaVersion: number; name: string; icao: string; position: string; kind: string; size: StripSize; fields: TemplateField[]; elements: DesignElement[] }
 /**
  * Exactly what one strip renders; everything else the modal fetches on demand.
  */
 export type StripView = { callsign: string; adep: string; ades: string; rules: string }
+/**
+ * One entry per catalogue key holding N placements: the font size belongs to the field and
+ * applies to all of them, which is why this is not flattened to a list of placements.
+ */
+export type TemplateField = { key: string; fontSizePt: number; placements: Placement[] }
+export type TemplateListing = { fileName: string; name: string; 
+/**
+ * An unparseable file is listed, flagged and still deletable — never silently hidden.
+ */
+valid: boolean; error: string | null }
+export type TextElement = { id: string; xMm: number; yMm: number; content: string; fontSizePt: number }
 
 /** tauri-specta globals **/
 

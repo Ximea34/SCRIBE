@@ -1,0 +1,51 @@
+/* The canvas clips the strip, so a zoomed strip never paints over the panel. */
+.canvas {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--c-bg);
+  border: var(--border-width) solid var(--c-border);
+  touch-action: none;
+  cursor: default;
+}
+
+.canvas:focus-visible {
+  outline-offset: calc(-2 * var(--s));
+}
+
+.panning {
+  cursor: grabbing;
+}
+
+/* Zoom and pan are one transform on this container; children keep their millimetre-derived
+   positions and are never re-laid out. The strip clips its own contents, so overflowing text
+   is cropped exactly as the printer will crop it. */
+.strip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  background: var(--c-row);
+  color: var(--c-strip-text);
+  overflow: hidden;
+  will-change: transform;
+}
+
+.item {
+  position: absolute;
+  white-space: nowrap;
+  line-height: 1;
+  letter-spacing: normal;
+  user-select: none;
+  cursor: move;
+}
+
+.text {
+  font-weight: 700;
+}
+
+.selected {
+  outline: calc(1 * var(--s)) solid var(--c-accent);
+  outline-offset: calc(1 * var(--s));
+}

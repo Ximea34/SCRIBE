@@ -1,0 +1,174 @@
+/* Every position is the Figma coordinate minus the 42 px title bar, scaled by --s. */
+.page {
+  position: relative;
+  height: 100%;
+  color: var(--c-text);
+}
+
+.sizeBox {
+  position: absolute;
+  left: calc(34 * var(--s));
+  top: calc(24 * var(--s));
+  display: flex;
+  gap: var(--size-box-gap);
+}
+
+.sizeGroup {
+  width: var(--size-box-width);
+}
+
+.sizeLabel {
+  height: var(--size-label-height);
+  display: grid;
+  place-items: center;
+  font-size: var(--font-editor-label);
+  letter-spacing: var(--tracking);
+}
+
+.sizeInput {
+  width: 100%;
+  height: var(--size-input-height);
+  margin-top: calc(7 * var(--s));
+  background: var(--c-input);
+  color: var(--c-text);
+  border: none;
+  font: inherit;
+  font-size: var(--font-editor-label);
+  letter-spacing: var(--tracking);
+  text-align: center;
+}
+
+.canvasSlot {
+  position: absolute;
+  left: calc(34 * var(--s));
+  top: calc(138 * var(--s));
+  width: var(--canvas-width);
+  height: var(--canvas-height);
+}
+
+.nameArea {
+  position: absolute;
+  left: calc(34 * var(--s));
+  top: calc(709 * var(--s));
+}
+
+.nameLabel {
+  height: var(--size-label-height);
+  font-size: var(--font-editor-label);
+  letter-spacing: var(--tracking);
+}
+
+.nameRow {
+  display: flex;
+  gap: calc(17 * var(--s));
+  margin-top: calc(7 * var(--s));
+}
+
+.nameInput {
+  width: var(--name-input-width);
+  height: var(--name-input-height);
+  background: var(--c-input);
+  color: var(--c-text);
+  border: none;
+  font: inherit;
+  font-size: var(--font-editor-label);
+  letter-spacing: var(--tracking);
+  padding: 0 calc(13 * var(--s));
+}
+
+/* Black on blue: the SAVE label differs from the tab labels. */
+.save {
+  width: var(--save-width);
+  height: var(--name-input-height);
+  background: var(--c-accent);
+  color: var(--c-strip-text);
+  font-size: var(--font-editor-label);
+  letter-spacing: var(--tracking);
+}
+
+.save:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.nameError {
+  margin-top: calc(6 * var(--s));
+  font-size: var(--font-editor-row);
+  color: var(--c-accent);
+  letter-spacing: normal;
+}
+
+.explorer {
+  position: absolute;
+  left: calc(697 * var(--s));
+  top: calc(685 * var(--s));
+  width: var(--explorer-width);
+  height: var(--explorer-height);
+  background: var(--c-row);
+  border: var(--border-width) solid var(--c-border);
+  display: flex;
+}
+
+.explorerList {
+  flex: 1;
+  min-width: 0;
+  padding: calc(12 * var(--s)) calc(9 * var(--s));
+}
+
+.explorerRow {
+  display: flex;
+  align-items: center;
+  gap: calc(7 * var(--s));
+  height: var(--explorer-row-height);
+  margin-bottom: var(--explorer-row-gap);
+  background: var(--c-input);
+  border: var(--border-width) solid var(--c-border);
+  padding: 0 calc(9 * var(--s)) 0 var(--explorer-row-inset);
+}
+
+.explorerName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: var(--font-editor-label);
+  letter-spacing: var(--tracking);
+  text-align: left;
+}
+
+.invalid {
+  color: var(--c-danger);
+}
+
+.explorerAction {
+  flex: none;
+  width: var(--icon-explorer);
+  height: var(--icon-explorer);
+  color: var(--c-text);
+}
+
+.explorerAction svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.explorerAction:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.panelSlot {
+  position: absolute;
+  left: calc(1467 * var(--s));
+  top: calc(26 * var(--s));
+  height: calc(980 * var(--s));
+}
+
+.notice {
+  position: absolute;
+  left: calc(34 * var(--s));
+  top: calc(676 * var(--s));
+  font-size: var(--font-editor-row);
+  color: var(--c-accent);
+}

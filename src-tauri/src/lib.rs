@@ -6,6 +6,7 @@ pub mod error;
 pub mod ipc;
 pub mod printing;
 pub mod settings;
+pub mod templates;
 
 use std::sync::Mutex;
 use std::time::Duration;
@@ -22,7 +23,7 @@ use aurora::AuroraClient;
 use domain::Store;
 use engine::{EngineHandle, EngineOptions};
 use ipc::events::TauriSink;
-use ipc::Ipc;
+use ipc::{Ipc, Templates};
 use settings::Settings;
 
 const SETTINGS_FILE: &str = "settings.json";
@@ -52,6 +53,12 @@ fn specta_builder() -> tauri_specta::Builder<tauri::Wry> {
             ipc::commands::board_snapshot,
             ipc::commands::activate_flight,
             ipc::commands::flight_detail,
+            ipc::commands::get_field_catalogue,
+            ipc::commands::list_templates,
+            ipc::commands::load_template,
+            ipc::commands::save_template,
+            ipc::commands::delete_template,
+            ipc::commands::import_logo,
         ])
         .events(tauri_specta::collect_events![ipc::events::BoardUpdated])
 }
@@ -74,6 +81,7 @@ pub fn run() {
     }
 
     let app = tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             if let Some(window) = app.get_webview_window("main") {
                 let _ = window.unminimize();
@@ -84,6 +92,7 @@ pub fn run() {
         .setup(move |app| {
             builder.mount_events(app);
             app.manage(LogGuard(Mutex::new(init_logging(app.handle()))));
+            manage_templates(app.handle());
             start(app.handle());
             Ok(())
         })
@@ -139,6 +148,20 @@ fn init_logging(app: &AppHandle) -> Option<WorkerGuard> {
             None
         }
     }
+}
+
+/// Registered before the board and independently of it: the editor works with Aurora
+/// disconnected and with no airport configured.
+fn manage_templates(app: &AppHandle) {
+    let directory = match app.path().app_data_dir() {
+        Ok(data_dir) => templates::storage::directory(&data_dir),
+        Err(error) => {
+            error!(%error, "no application data directory; templates fall back to the temp dir");
+            std::env::temp_dir().join("scribe-strips")
+        }
+    };
+    info!(?directory, "strip templates directory");
+    app.manage(Templates(directory));
 }
 
 /// Brings the board up. A missing or unusable airport configuration leaves the UI running with

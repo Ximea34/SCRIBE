@@ -35,6 +35,8 @@ tauri-plugin-single-instance = "2"
 specta = { version = "=2.0.0-rc.22", features = ["derive"] }
 specta-typescript = "=0.0.9"
 tauri-specta = { version = "=2.0.0-rc.21", features = ["derive", "typescript"] }
+base64 = "0.23.1"
+tauri-plugin-dialog = "2.7.2"
 
 [dev-dependencies]
 mock-aurora = { path = "mock-aurora" }
