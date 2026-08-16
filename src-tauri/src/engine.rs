@@ -236,9 +236,9 @@ impl Engine {
                 let now = self.clock.now();
                 let outcome = self.store.activate(&callsign, now).map_err(IpcError::from);
                 if outcome.is_ok() {
-                    // A click must land immediately rather than wait for the next tick.
+                    // A click must land immediately rather than wait for the next tick; the
+                    // publish that follows persists the new activation on its own.
                     self.publish();
-                    self.save_activations(true);
                 }
                 let _ = respond_to.send(outcome);
             }

@@ -2,6 +2,7 @@ import { memo } from "react";
 
 import { truncate } from "../../app/truncate";
 import { useStrip } from "../../hooks/useStoreSlice";
+import { cx } from "../cx";
 
 import styles from "./Strip.module.css";
 
@@ -31,12 +32,18 @@ const ADEP = cell(295.5, 113);
 const ADES = cell(408.5, 113);
 const RULES = cell(531, 122);
 
-export const Strip = memo(function Strip({ callsign }: { callsign: string }) {
+interface StripProps {
+  callsign: string;
+  // Only ÉVEILLÉS passes this; without it the strip is inert, which is the affordance.
+  onSelect?: ((callsign: string) => void) | undefined;
+}
+
+export const Strip = memo(function Strip({ callsign, onSelect }: StripProps) {
   const view = useStrip(callsign);
   if (!view) return null;
 
-  return (
-    <div className={styles.strip}>
+  const cells = (
+    <>
       <span className={styles.cell} style={CALLSIGN.style}>
         {truncate(view.callsign, CALLSIGN.budgetEm, TRACKING_EM)}
       </span>
@@ -49,6 +56,22 @@ export const Strip = memo(function Strip({ callsign }: { callsign: string }) {
       <span className={styles.cell} style={RULES.style}>
         {truncate(view.rules, RULES.budgetEm, TRACKING_EM)}
       </span>
-    </div>
+    </>
+  );
+
+  if (!onSelect) {
+    return <div className={styles.strip}>{cells}</div>;
+  }
+
+  return (
+    <button
+      type="button"
+      className={cx(styles.strip, styles.selectable)}
+      onClick={() => {
+        onSelect(callsign);
+      }}
+    >
+      {cells}
+    </button>
   );
 });

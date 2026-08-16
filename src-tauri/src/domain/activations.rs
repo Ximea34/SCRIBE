@@ -1,7 +1,11 @@
 use std::path::Path;
+use std::sync::atomic::{AtomicU64, Ordering};
 
 use serde::{Deserialize, Serialize};
 use tracing::warn;
+
+/// Makes each temporary file unique: two saves in flight must not fight over one name.
+static WRITE_TICKET: AtomicU64 = AtomicU64::new(0);
 
 /// Keyed on more than the callsign: a callsign recycled the next day must not inherit
 /// yesterday's activation, so the departure field and EOBT have to match too (5.4).
@@ -33,12 +37,20 @@ pub fn load(path: &Path) -> Vec<ActivationRecord> {
     }
 }
 
+/// Written through a uniquely named temporary file and renamed into place, so a crash or an
+/// overlapping save can never leave a half-written board behind.
 pub fn save(path: &Path, records: &[ActivationRecord]) -> Result<(), std::io::Error> {
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent)?;
     }
     let text = serde_json::to_string_pretty(records)?;
-    let temporary = path.with_extension("tmp");
+    let ticket = WRITE_TICKET.fetch_add(1, Ordering::Relaxed);
+    let temporary = path.with_extension(format!("tmp{ticket}"));
+
     std::fs::write(&temporary, text)?;
-    std::fs::rename(&temporary, path)
+    let renamed = std::fs::rename(&temporary, path);
+    if renamed.is_err() {
+        let _ = std::fs::remove_file(&temporary);
+    }
+    renamed
 }

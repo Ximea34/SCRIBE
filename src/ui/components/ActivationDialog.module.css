@@ -1,0 +1,31 @@
+/* STUB styling: legible and nothing more, pending the dialog's Figma. */
+.title {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+
+.fields {
+  margin: 0 0 1rem;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 9rem 1fr;
+  gap: 0.5rem;
+  padding: 0.125rem 0;
+}
+
+.label {
+  color: #555;
+}
+
+.value {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}

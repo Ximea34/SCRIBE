@@ -6,11 +6,15 @@ local 3rd-party TCP socket and shows which strips exist, which are live, and whi
 
 Desktop app: Tauri 2 (Rust) + Vite / React / TypeScript.
 
-> **Status.** Increments A to E of six are complete. VIGIE shows live strips end to end: the
-> Aurora protocol layer, connection client, mock server, airport configuration, domain layer
-> (classification, ordering, removal rules, board diffing), polling scheduler, engine, typed IPC,
-> interface shell and the board itself. The activation dialog lands next, so strips are still
-> read-only.
+> **Status.** All six increments are complete: VIGIE works end to end, from the Aurora socket to
+> a controller activating a strip. IFR, EDITEUR and OPTIONS are empty, routable placeholders by
+> design.
+>
+> **One declared stub.** The activation dialog has no visual design yet — `ActivationDialog.tsx`
+> and its stylesheet are deliberately plain and off the design tokens, pending its Figma. The
+> behaviour around it is finished: focus trap, `Esc` to cancel, `Enter` to confirm, focus
+> restored on close, and the activation itself. Dropping in the real design touches that one
+> component.
 
 ## Prerequisites
 
@@ -119,6 +123,10 @@ Measured live against the mock at 200 traffics, over a 30-second window: **26 bo
 zero re-renders of an unchanged strip**, worst commit 0.90 ms, average 0.18 ms. Panes scroll
 independently and off-screen strips are skipped with `content-visibility`, so no virtualisation
 library is needed.
+
+Only ÉVEILLÉS strips are clickable, and only they respond to the pointer — arrivals and transits
+are never activated, so they never invite a click. Confirming moves the strip into ACTIVÉS and
+the change is persisted, so an activated board survives a restart or an Aurora reconnect.
 
 ## Development
 

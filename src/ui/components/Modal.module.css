@@ -1,0 +1,24 @@
+/* STUB. Deliberately plain and off the design tokens until the Figma for the dialog arrives —
+   it should not be mistaken for finished work. */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgb(0 0 0 / 60%);
+  z-index: 100;
+}
+
+.dialog {
+  min-width: 32rem;
+  max-width: 48rem;
+  max-height: 80vh;
+  overflow: auto;
+  padding: 1.25rem;
+  background: #fff;
+  color: #000;
+  font:
+    400 0.875rem/1.5 system-ui,
+    sans-serif;
+  letter-spacing: normal;
+}

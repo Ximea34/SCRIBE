@@ -1,12 +1,28 @@
 .strip {
   position: relative;
+  display: block;
   flex: none;
+  width: 100%;
   height: var(--strip-height);
   background: var(--c-strip);
   color: var(--c-strip-text);
+  /* Arrivals and transits are never activated, so they do not invite a click. */
+  cursor: default;
   /* Near-virtualisation for free: off-screen strips are not laid out or painted. */
   content-visibility: auto;
   contain-intrinsic-size: auto var(--strip-height);
+}
+
+.selectable {
+  cursor: pointer;
+}
+
+.selectable:hover {
+  background: #ececec;
+}
+
+.selectable:active {
+  background: #dedede;
 }
 
 /* Tracking trails the last glyph, so the run sits half a tracking step left of the box centre;
